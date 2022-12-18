@@ -62,7 +62,7 @@ async def prep_solution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 async def prep_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
     conn = sql.connect('database/study_bot.db')
     query_db = conn.cursor()
-    query_db.execute("""SELECT GROUP_ID FROM ALL_TASKS""")
+    query_db.execute("""SELECT GROUP_ID FROM GROUPS""")
     response = set([group[0] for group in query_db.fetchall()])
     conn.commit()
     conn.close()
@@ -76,6 +76,7 @@ async def prep_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         reply_markup = InlineKeyboardMarkup(keyboard)
         context.user_data["collection"] = update.message.text
         context.user_data["new_collection"] = True
+        context.user_data["user_id"] = update.message.from_user.id
         await context.bot.send_message(
             text="Такой коллекции пока нет. Мне её создать?",
             chat_id=update.message.chat_id, reply_markup=reply_markup)
@@ -89,6 +90,12 @@ async def prep_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def create_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.callback_query.data == "Да":
+        conn = sql.connect('database/study_bot.db')
+        query_db = conn.cursor()
+        query_db.execute("""INSERT INTO GROUPS VALUES(?, ?, ?);""",
+                         (context.user_data["collection"], context.user_data["user_id"], None))
+        conn.commit()
+        conn.close()
         await add_query(update, context)
         context.user_data.clear()
         await bot_help(update, context)

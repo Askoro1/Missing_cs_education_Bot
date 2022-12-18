@@ -22,7 +22,8 @@ from .handlers.check_ans import *
 from .handlers.top import *
 from .handlers.get_all_tasks import *
 from .handlers.my_stat import *
-
+from .handlers.delete_tasks import delete_task, is_access
+from .handlers.edit_tasks import edit_task, check_keyboard_for_edit, edit_condition
 
 def run_bot(config_file_path: str):
     # get bot configuration
@@ -88,6 +89,25 @@ def run_bot(config_file_path: str):
         fallbacks=[]
     )
 
+    delete_task_handler = ConversationHandler(
+        entry_points=[CommandHandler('delete', delete_task)],
+        states={
+            'is_access': [MessageHandler(filters.TEXT, is_access)]
+        },
+        fallbacks=[]
+    )
+    edit_task_handler = ConversationHandler(
+        entry_points=[CommandHandler('edit', edit_task)],
+        states={
+            'choose_tab': [CallbackQueryHandler(check_keyboard_for_edit)],
+            'edit_condition': [CallbackQueryHandler]
+            'edit_solution': [CallbackQueryHandler(check_keyboard_for_edit)],
+            'edit_task': [CallbackQueryHandler(edit_condition)],
+            'edit_ans': [],
+        },
+        fallbacks=[]
+    )
+
     application.add_handler(start_handler)
     application.add_handler(help_handler)
     application.add_handler(add_task_handler)
@@ -95,6 +115,7 @@ def run_bot(config_file_path: str):
     application.add_handler(my_stat_handler)
     application.add_handler(all_tasks_handler)
     application.add_handler(top_handler)
-
+    application.add_handler(delete_task_handler)
+    application.add_handler(edit_task_handler)
     # initialize and start the bot application
     application.run_polling()

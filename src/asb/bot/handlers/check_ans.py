@@ -10,6 +10,7 @@ from .help import bot_help
 async def check_ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.message.text
     user_id = update.message.from_user.id
+    user_nickname = update.message.from_user.username
     task_number = context.user_data["task_number"]
     conn = sql.connect('database/study_bot.db')
     query_db = conn.cursor()
@@ -17,6 +18,7 @@ async def check_ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"""SELECT * FROM All_Tasks WHERE ID = "{task_number}";""")
     res = query_db.fetchone()
     ans = res[2]
+    group_id = res[4]
 
     query_db.execute(
         f"""SELECT * FROM Students WHERE ID = "{user_id}";""")
@@ -32,6 +34,18 @@ async def check_ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
         success_solve = res[3] + 1
         query_db.execute(
             f"""UPDATE Students set SUCCESS_SOLVE = {success_solve} WHERE ID = "{user_id}";""")
+
+        query_db.execute(
+            f"""SELECT * FROM Groups WHERE GROUP_ID = "{group_id}";""")
+        res_group = query_db.fetchone()
+        new_res = res_group[2]
+        if new_res == None:
+            new_res = ""
+        new_res = new_res + " " + str(user_nickname) + "_" + str(task_number)
+
+        query_db.execute(
+            f"""UPDATE Groups set RESULTS = "{new_res}" WHERE GROUP_ID = "{group_id}";""")
+
         await context.bot.send_message(
             text=f"Правильно!",
             chat_id=update.message.chat_id)

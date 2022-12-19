@@ -1,6 +1,5 @@
-from typing import Optional
 import sqlite3 as sql
-from telegram import Chat, ChatMember, User, ChatMemberUpdated, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update
 from telegram.ext import ContextTypes
 
 

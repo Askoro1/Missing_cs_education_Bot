@@ -42,6 +42,7 @@ async def specify_group_dt(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             text=f"Такой коллекции не существует, пожалуйста, введите команду еще раз.",
             chat_id=context.user_data["chat_id"])
         context.user_data.clear()
+        await bot_help(update, context)
         return ConversationHandler.END
     if res[1] == user_id:
         context.user_data["group_id"] = update.message.text
@@ -51,6 +52,7 @@ async def specify_group_dt(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             text=f"Вы не создавали эту коллекцию, поэтому удалить в ней ничего не можете :(",
             chat_id=context.user_data["chat_id"])
         context.user_data.clear()
+        await bot_help(update, context)
         return ConversationHandler.END
 
 

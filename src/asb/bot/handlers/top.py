@@ -1,17 +1,7 @@
 import sqlite3 as sql
-from os import mkdir
-from telegram import (
-    KeyboardButton,
-    KeyboardButtonPollType,
-    Poll,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-)
-from collections import deque
 
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import ContextTypes
 
 
 async def top(update: Update, context: ContextTypes.DEFAULT_TYPE):

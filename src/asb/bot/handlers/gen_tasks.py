@@ -1,19 +1,12 @@
-from typing import Optional, Union
+from typing import Union
 from telegram import (
-    KeyboardButton,
-    KeyboardButtonPollType,
-    Poll,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
     ForceReply
 )
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ParseMode
-from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
+from telegram.ext import ContextTypes
 import sqlite3 as sql
 
-from python_pr_3.StudyBot.src.asb.bot.handlers.check_role import check_student
+from .check_role import check_student
 
 
 async def gen_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:

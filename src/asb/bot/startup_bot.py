@@ -1,5 +1,5 @@
-### External Modules
 import logging
+
 from telegram.ext import (
     filters,
     ApplicationBuilder,
@@ -9,7 +9,6 @@ from telegram.ext import (
     ConversationHandler,
 )
 
-### Internal Modules
 # bot config
 from .load_config import BotConfig
 
@@ -26,6 +25,7 @@ from .handlers.delete_tasks import *
 from .handlers.delete_groups import *
 from .handlers.edit_tasks import *
 from .handlers.results import *
+
 
 def run_bot(config_file_path: str):
     # get bot configuration

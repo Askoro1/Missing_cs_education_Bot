@@ -1,7 +1,6 @@
 from typing import Union
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ParseMode
-from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
+from telegram.ext import ConversationHandler, ContextTypes
 import sqlite3 as sql
 from .gen_tasks import send_task_message
 from .help import bot_help

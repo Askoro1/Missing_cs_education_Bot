@@ -1,12 +1,9 @@
-from typing import Union
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ParseMode
-from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
+from telegram.ext import ContextTypes
 import sqlite3 as sql
 
 from .check_role import check_student
-from .gen_tasks import send_task_message
-from .help import bot_help
+
 
 async def my_stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id

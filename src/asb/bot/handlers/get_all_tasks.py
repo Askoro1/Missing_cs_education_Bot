@@ -1,17 +1,11 @@
-from typing import Optional, Union
+from typing import Union
 from telegram import (
-    KeyboardButton,
-    KeyboardButtonPollType,
-    Poll,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-    ForceReply
+    ForceReply,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
 )
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ParseMode
-from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
-import sqlite3 as sql
+
+from telegram.ext import ConversationHandler, ContextTypes
 
 from .check_role import check_teacher
 from .help import *

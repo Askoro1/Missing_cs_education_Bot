@@ -87,7 +87,14 @@ async def choose_task_collection(update: Update, context: ContextTypes.DEFAULT_T
         context.user_data.clear()
         await context.bot.sendMessage(
             text="Заканчиваем подбор задач.", chat_id=update.message.chat_id)
-        return ConversationHandler.END
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
     else:
         context.user_data["group"] = update.message.text
         context.user_data["text_group"] = True

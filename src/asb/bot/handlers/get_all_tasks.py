@@ -12,25 +12,62 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.constants import ParseMode
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
 import sqlite3 as sql
+
+from .check_role import check_teacher
 from .help import *
 
 
 async def all_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+    correct_person = check_teacher(user_id)
+    if correct_person != "correct":
+        await context.bot.sendMessage(text="Эта функция доступна только преподавателю.",
+                                      chat_id=update.message.chat_id)
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
     await context.bot.sendMessage(text="Введите название коллекции, задания которой вы хотите посмотреть:",
                                   chat_id=update.message.chat_id, reply_markup=ForceReply())
+    context.user_data["chat_id"] = update.message.chat_id
     return "input_group"
 
 
 async def get_all_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    message = update.message.text
     conn = sql.connect('database/study_bot.db')
     query_db = conn.cursor()
+    user_id = update.message.from_user.id
+    message = update.message.text
+    query_db.execute(f"""SELECT * FROM Groups WHERE GROUP_ID = "{message}";""")
+    group = query_db.fetchone()
     query_db.execute(
         f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{message}";""")
     res = query_db.fetchall()
-    if res is None or len(res) == 0:
-        await context.bot.sendMessage(
-            text="Такой коллекции не существует, создайте ее, если хотите!", chat_id=update.message.chat_id)
+    conn.commit()
+    conn.close()
+    if group is None:
+        await context.bot.send_message(
+            text=f"Такой коллекции не существует.",
+            chat_id=context.user_data["chat_id"])
+        context.user_data.clear()
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return 'what_to_do'
+    if group[1] != user_id:
+        await context.bot.send_message(
+            text=f"Вы не создавали эту коллекцию, поэтому посмотреть ее задания не можете :(",
+            chat_id=context.user_data["chat_id"])
+        context.user_data.clear()
         keyboard = [
             [
                 InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")

@@ -13,22 +13,27 @@ from telegram.constants import ParseMode
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
 import sqlite3 as sql
 from .help import *
+from .check_role import *
 
 
 async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
-    conn = sql.connect('database/study_bot.db')
-    query_db = conn.cursor()
-    query_db.execute(
-        f"""SELECT * FROM Teachers WHERE ID = "{user_id}";""")
-    res = query_db.fetchone()
-    if res is None or len(res) == 0:
-        await context.bot.sendMessage(text="Эта функция доступна только преподавателю (пососи чел)",
+    correct_person = check_teacher(user_id)
+    if correct_person == "correct":
+        await context.bot.sendMessage(text="Введите название группы, результаты которой вы хотите посмотреть.",
                                       chat_id=update.message.chat_id)
-        return ConversationHandler.END
-    await context.bot.sendMessage(text="Введите название группы, результаты которой вы хотите посмотреть.",
-                                  chat_id=update.message.chat_id)
-    return "input_group"
+        return "input_group"
+    else:
+        await context.bot.sendMessage(text="Эта функция доступна только преподавателю.",
+                                      chat_id=update.message.chat_id)
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
 
 
 async def get_resuts(update: Update, context: ContextTypes.DEFAULT_TYPE):

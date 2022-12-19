@@ -49,7 +49,9 @@ def run_bot(config_file_path: str):
                 'prep_ans': [MessageHandler(filters=filters.TEXT, callback=prep_ans)],
                 'prep_solution': [MessageHandler(filters=(filters.TEXT | filters.PHOTO), callback=prep_solution)],
                 'prep_collection': [MessageHandler(filters=filters.TEXT, callback=prep_collection)],
-                'create_collection': [CallbackQueryHandler(create_collection)]},
+                'create_collection': [CallbackQueryHandler(create_collection)],
+                'what_to_do': [CallbackQueryHandler(what_to_do)]
+                },
         fallbacks=[]
     )
 
@@ -61,7 +63,8 @@ def run_bot(config_file_path: str):
             'choose_collection': [MessageHandler(filters.TEXT, choose_task_collection)],
             'check_ans': [MessageHandler(filters.TEXT, check_ans)],
             'choose_next_when_correct': [CallbackQueryHandler(choose_next_step_correct)],
-            'choose_next_when_incorrect': [CallbackQueryHandler(choose_next_step_incorrect)]
+            'choose_next_when_incorrect': [CallbackQueryHandler(choose_next_step_incorrect)],
+            'what_to_do': [CallbackQueryHandler(what_to_do)]
         },
         fallbacks=[]
     )
@@ -105,7 +108,8 @@ def run_bot(config_file_path: str):
         states={
             'specify_group': [MessageHandler(filters.TEXT, specify_group_dt)],
             'delete_task_from_db': [MessageHandler(filters.TEXT, delete_task_by_number)],
-            'show_next_steps': [CallbackQueryHandler(show_next_steps_dt)]
+            'show_next_steps': [CallbackQueryHandler(show_next_steps_dt)],
+            'what_to_do': [CallbackQueryHandler(what_to_do)]
         },
         fallbacks=[]
     )
@@ -115,7 +119,8 @@ def run_bot(config_file_path: str):
         states={
             'specify_group': [MessageHandler(filters.TEXT, specify_group_dg)],
             'confirm_deletion': [CallbackQueryHandler(confirm_deletion)],
-            'show_next_steps': [CallbackQueryHandler(show_next_steps_dg)]
+            'show_next_steps': [CallbackQueryHandler(show_next_steps_dg)],
+            'what_to_do': [CallbackQueryHandler(what_to_do)]
         },
         fallbacks=[]
     )
@@ -127,6 +132,7 @@ def run_bot(config_file_path: str):
             'pre_edit_condition': [MessageHandler(filters.TEXT, pre_edit_condition)],
             'edit_condition': [MessageHandler(filters.TEXT, edit_condition)],
             'show_next_steps_et': [CallbackQueryHandler(show_next_steps_et)],
+            'what_to_do': [CallbackQueryHandler(what_to_do)]
         },
         fallbacks=[]
     )

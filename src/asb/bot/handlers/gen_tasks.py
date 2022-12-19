@@ -13,8 +13,23 @@ from telegram.constants import ParseMode
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
 import sqlite3 as sql
 
+from python_pr_3.StudyBot.src.asb.bot.handlers.check_role import check_student
+
 
 async def gen_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    user_id = update.message.from_user.id
+    correct_person = check_student(user_id)
+    if correct_person != "correct":
+        await context.bot.sendMessage(text="Эта функция доступна только ученикам.",
+                                      chat_id=update.message.chat_id)
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
     keyboard = [
         [
             InlineKeyboardButton("Дефолтные", callback_data="Стандарт"),

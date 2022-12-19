@@ -13,10 +13,25 @@ from collections import deque
 
 from telegram import Update, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
+
+from .check_role import check_teacher
 from .help import bot_help
 
 
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    user_id = update.message.from_user.id
+    correct_person = check_teacher(user_id)
+    if correct_person != "correct":
+        await context.bot.sendMessage(text="Эта функция доступна только преподавателю.",
+                                      chat_id=update.message.chat_id)
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
     context.user_data["chat_id"] = update.message.chat_id
     await context.bot.send_message(text="Напишите в сообщения или пришлите фотографией условие вашей задачи:",
                                    chat_id=update.message.chat_id, reply_markup=ForceReply())

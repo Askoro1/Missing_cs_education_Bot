@@ -2,10 +2,25 @@ from typing import Union
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
 import sqlite3 as sql
 from telegram.ext import ConversationHandler, ContextTypes
+
+from .check_role import check_teacher
 from .help import bot_help
 
 
 async def delete_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    user_id = update.message.from_user.id
+    correct_person = check_teacher(user_id)
+    if correct_person != "correct":
+        await context.bot.sendMessage(text="Эта функция доступна только преподавателю.",
+                                      chat_id=update.message.chat_id)
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
     context.user_data["chat_id"] = update.message.chat_id
     return await delete_group_start_state(update, context)
 

@@ -4,10 +4,25 @@ from telegram.constants import ParseMode
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
 import sqlite3 as sql
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
+
+from .check_role import check_teacher
 from .help import bot_help
 
 
 async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    user_id = update.message.from_user.id
+    correct_person = check_teacher(user_id)
+    if correct_person != "correct":
+        await context.bot.sendMessage(text="Эта функция доступна только преподавателю.",
+                                      chat_id=update.message.chat_id)
+        keyboard = [
+            [
+                InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
+        return "what_to_do"
     context.user_data["chat_id"] = update.message.chat_id
     await context.bot.send_message(
         text="Выберите коллекцию, из которой хотите редактировать задачи. Для этого напишите ниже название коллекции:",
@@ -71,15 +86,23 @@ async def show_tasks_in_group(update: Update, context: ContextTypes.DEFAULT_TYPE
         return ConversationHandler.END
     from_numbers_to_tasks = dict()
     for i in range(len(res)):
+        answer = res[i][2]
+        solution = res[i][3]
         task = res[i][1]
         if type(task) != str:
-            await context.bot.send_photo(photo=task, chat_id=context.user_data["chat_id"])
+            await context.bot.send_photo(photo=task, chat_id=update.message.chat_id)
             task = 'Изображение выше'
-        ans = str(i + 1) + '. ' + task + '\n'
+        if type(answer) != str:
+            await context.bot.send_photo(photo=answer, chat_id=update.message.chat_id)
+            answer = 'Изображение выше'
+        if type(solution) != str:
+            await context.bot.send_photo(photo=solution, chat_id=update.message.chat_id)
+            solution = 'Изображение выше'
+        ans = str(i + 1) + '. ' + task + '\n Ответ: ' + answer + '\n Решение: ' + solution + '\n'
         from_numbers_to_tasks[str(i + 1)] = res[i][0]
         await context.bot.send_message(
             text=f"{ans}",
-            chat_id=context.user_data["chat_id"])
+            chat_id=update.message.chat_id)
     context.user_data["tasks"] = from_numbers_to_tasks
     return 'pre_edit_condition'
 
@@ -131,7 +154,7 @@ async def edit_condition(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     keyboard = [
         [
-            InlineKeyboardButton("Продолжить", callback_data="Продолжить"),
+            #InlineKeyboardButton("Продолжить", callback_data="Продолжить"),
             InlineKeyboardButton("Выйти", callback_data="Выйти к списку команд")
         ]
     ]

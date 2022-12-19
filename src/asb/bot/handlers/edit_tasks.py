@@ -1,5 +1,5 @@
 from typing import Union
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ForceReply
 from telegram.constants import ParseMode
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ConversationHandler, ContextTypes
 import sqlite3 as sql
@@ -7,80 +7,147 @@ from telegram.ext import Application, ChatMemberHandler, CommandHandler, Convers
 from .help import bot_help
 
 
-async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    context.user_data["chat_id"] = update.message.chat_id
+    await context.bot.send_message(
+        text="Выберите коллекцию, из которой хотите редактировать задачи. Для этого напишите ниже название коллекции:",
+        chat_id=context.user_data["chat_id"], reply_markup=ForceReply()
+    )
+    return 'specify_group'
+
+
+async def specify_group_et(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
     conn = sql.connect('database/study_bot.db')
     query_db = conn.cursor()
-    id = update.message.from_user.id
-    message = update.message.text.split()
-    if len(message) == 1:
+    user_id = update.message.from_user.id
+    query_db.execute(f"""SELECT * FROM Groups WHERE GROUP_ID = "{update.message.text}";""")
+    res = query_db.fetchone()
+    conn.commit()
+    conn.close()
+    if res is None:
         await context.bot.send_message(
-            text=f"Недостаточно параметров для использования, пожалуйста, команду введите еще раз.",
-            chat_id=update.message.chat_id)
+            text=f"Такой коллекции не существует, пожалуйста, введите команду еще раз.",
+            chat_id=context.user_data["chat_id"])
+        context.user_data.clear()
         return ConversationHandler.END
-    elif len(message) == 2:
-        query_db.execute(
-        f"""SELECT * FROM Groups WHERE GROUP_ID = "{message[1]}";""")
-        res = query_db.fetchone()
-        id = update.message.from_user.id
-        if res is None:
-            await context.bot.send_message(
-                text=f"Такой группы не существует, пожалуйста, введите команду еще раз.",
-                chat_id=update.message.chat_id)
-            return ConversationHandler.END
-        if res[1] == id:
-            query_db.execute(
-                f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{message[1]}";""")
-            res = query_db.fetchall()
-            ans = ''
-            if res is None or len(res) == 0:
-                await context.bot.send_message(
-                    text=f"Эта группа уже пуста, тут нет задач, если хотите - добавьте их командой /add [название группы].",
-                    chat_id=update.message.chat_id)
-                return ConversationHandler.END
-            list_tasks = dict()
-            for i in range(len(res)):
-                task = res[i][1]
-                if type(task) != str:
-                    await context.bot.send_photo(photo=task, chat_id=update.message.chat_id)
-                    task = 'Изображение выше'
-                ans += str(i + 1) + '. ' + task + '\n'
-                list_tasks[str(i + 1)] = res[i][0]
-            await context.bot.send_message(
-                text=f"{ans}",
-                chat_id=update.message.chat_id)
-            context.user_data["tasks"] = list_tasks
-            keyboard = [
-                [
-                    InlineKeyboardButton("Изменить условие", callback_data="Изменить условие"),
-                    InlineKeyboardButton("Изменить решение", callback_data="Изменить решение"),
-                    InlineKeyboardButton("Изменить ответ", callback_data="Изменить ответ"),
-                    InlineKeyboardButton("Выйти из редактирования", callback_data="Выйти из редактирования")
-                ]
-            ]
-
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-            await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
-            return 'choose_tab'
-        else:
-            await context.bot.send_message(
-                text=f"У вас нет доступа к этой группе, поэтому редактировать вы ее не можете :(",
-                chat_id=update.message.chat_id)
-            return ConversationHandler.END
+    if res[1] == user_id:
+        context.user_data["group_id"] = update.message.text
+        return await show_tasks_in_group(update, context)
+    else:
+        await context.bot.send_message(
+            text=f"Вы не создавали эту коллекцию, поэтому удалить в ней ничего не можете :(",
+            chat_id=context.user_data["chat_id"])
+        context.user_data.clear()
+        return ConversationHandler.END
 
 
 async def check_keyboard_for_edit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     if query.data == "Изменить условие":
-        return 'edit_condition'
+        return 'pre_edit_condition'
     elif query.data == "Изменить решение":
-        return 'edit_solution'
+        return 'pre_edit_solution'
     elif query.data == "Изменить ответ":
-        return 'edit_ans'
+        return 'pre_edit_ans'
     elif query.data == "Выйти из редактирования":
         await context.bot.send_message(text="Вы вышли из режима редактирования задачи!", chat_id=query.message.chat_id)
         return ConversationHandler.END
 
 
+async def show_tasks_in_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
+    conn = sql.connect('database/study_bot.db')
+    query_db = conn.cursor()
+    query_db.execute(
+        f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{context.user_data["group_id"]}";""")
+    res = query_db.fetchall()
+    conn.commit()
+    conn.close()
+    if res is None or len(res) == 0:
+        await context.bot.send_message(
+            text=f"Эта коллекция пуста. Для добавления новых задач воспользуйтесь командой /add.",
+            chat_id=context.user_data["chat_id"])
+        context.user_data.clear()
+        await bot_help(update, context)
+        return ConversationHandler.END
+    from_numbers_to_tasks = dict()
+    for i in range(len(res)):
+        task = res[i][1]
+        if type(task) != str:
+            await context.bot.send_photo(photo=task, chat_id=context.user_data["chat_id"])
+            task = 'Изображение выше'
+        ans = str(i + 1) + '. ' + task + '\n'
+        from_numbers_to_tasks[str(i + 1)] = res[i][0]
+        await context.bot.send_message(
+            text=f"{ans}",
+            chat_id=context.user_data["chat_id"])
+    context.user_data["tasks"] = from_numbers_to_tasks
+    return 'pre_edit_condition'
+
+
+async def pre_edit_condition(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await context.bot.send_message(text="Введите, пожалуйста, что вы хотите изменить и как в формате [Ответ/Решение/Условие] [текст]!", chat_id=update.message.chat_id)
+    context.user_data["num"] = update.message.text
+    keyboard = [
+        [
+            InlineKeyboardButton("Продолжить", callback_data="Продолжить"),
+            InlineKeyboardButton("Выйти", callback_data="Выйти к списку команд")
+        ]
+    ]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if context.user_data["num"] not in context.user_data["tasks"].keys():
+        await context.bot.send_message(
+            text="Вы ввели несуществующий номер задачи. Возможно задача была удалена ранее. Повторите попытку.",
+            chat_id=context.user_data["chat_id"], reply_markup=reply_markup)
+        return 'show_next_steps_et'
+    return 'edit_condition'
+
+
 async def edit_condition(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    pass
+    all_tasks = context.user_data["tasks"]
+    text_task = update.message.text.split()
+    keyboard = [
+        [
+            InlineKeyboardButton("Продолжить", callback_data="Продолжить"),
+            InlineKeyboardButton("Выйти", callback_data="Выйти к списку команд")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    if text_task[0] not in ['Ответ', 'Решение', 'Условие'] or len(text_task) <= 1:
+        await context.bot.send_message(
+            text="Вы ввели данные в неверном формате, попробуйте еще раз!",
+            chat_id=context.user_data["chat_id"], reply_markup=reply_markup)
+        return 'show_next_steps_et'
+    conn = sql.connect('database/study_bot.db')
+    query_db = conn.cursor()
+    if text_task[0] == 'Ответ':
+        field = 'ANSWER'
+    elif text_task[0] == 'Решение':
+        field = 'SOLVE'
+    else:
+        field = 'TASK'
+    query_db.execute(f"""UPDATE All_Tasks SET "{field}" = "{text_task[1]}" WHERE ID = "{all_tasks[context.user_data['num']]}";""")
+    conn.commit()
+    conn.close()
+    keyboard = [
+        [
+            InlineKeyboardButton("Продолжить", callback_data="Продолжить"),
+            InlineKeyboardButton("Выйти", callback_data="Выйти к списку команд")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await context.bot.send_message(text=f"Задача {context.user_data['num']} была успешно отредактирована!",
+                                       chat_id=context.user_data["chat_id"])
+    await context.bot.send_message(text="Что дальше?",
+                                       chat_id=context.user_data["chat_id"],
+                                       reply_markup=reply_markup)
+    return 'show_next_steps_et'
+
+
+async def show_next_steps_et(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.callback_query.data == 'Продолжить':
+        return await show_tasks_in_group(update, context)
+    elif update.callback_query.data == 'Выйти к списку команд':
+        context.user_data.clear()
+        await bot_help(update, context)
+        return ConversationHandler.END

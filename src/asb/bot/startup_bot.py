@@ -121,13 +121,12 @@ def run_bot(config_file_path: str):
     )
 
     edit_task_handler = ConversationHandler(
-        entry_points=[CommandHandler('edit', edit_task)],
+        entry_points=[CommandHandler('edit_task', edit_task)],
         states={
-            'choose_tab': [CallbackQueryHandler(check_keyboard_for_edit)],
-            'edit_condition': [CallbackQueryHandler],
-            'edit_solution': [CallbackQueryHandler(check_keyboard_for_edit)],
-            'edit_task': [CallbackQueryHandler(edit_condition)],
-            'edit_ans': [],
+            'specify_group': [MessageHandler(filters.TEXT, specify_group_et)],
+            'pre_edit_condition': [MessageHandler(filters.TEXT, pre_edit_condition)],
+            'edit_condition': [MessageHandler(filters.TEXT, edit_condition)],
+            'show_next_steps_et': [CallbackQueryHandler(show_next_steps_et)],
         },
         fallbacks=[]
     )

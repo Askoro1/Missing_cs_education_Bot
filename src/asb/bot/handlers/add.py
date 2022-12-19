@@ -17,10 +17,9 @@ from .help import bot_help
 
 
 async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    print(context.user_data)
     context.user_data["chat_id"] = update.message.chat_id
     await context.bot.send_message(text="Напишите в сообщения или пришлите фотографией условие вашей задачи:",
-                                   chat_id=update.message.chat_id, reply_markup=ForceReply(input_field_placeholder="Задача"))
+                                   chat_id=update.message.chat_id, reply_markup=ForceReply())
     return 'prep_task'
 
 
@@ -34,7 +33,7 @@ async def prep_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         context.user_data["text_task"] = update.message.text
 
     await context.bot.send_message(text="Напишите ответ к заданию:",
-                                   chat_id=update.message.chat_id, reply_markup=ForceReply(input_field_placeholder="Ответ"))
+                                   chat_id=update.message.chat_id, reply_markup=ForceReply())
     return 'prep_ans'
 
 
@@ -42,7 +41,7 @@ async def prep_ans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     context.user_data["ans"] = update.message.text
 
     await context.bot.send_message(text="Напишите в сообщения или пришлите фотографией решение:",
-                                   chat_id=update.message.chat_id, reply_markup=ForceReply(input_field_placeholder="Решение"))
+                                   chat_id=update.message.chat_id, reply_markup=ForceReply())
     return 'prep_solution'
 
 
@@ -55,7 +54,7 @@ async def prep_solution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     else:
         context.user_data["text_solution"] = update.message.text
     await context.bot.send_message(text="Выберите или создайте коллекцию, в которую хотите что-то добавить. Для этого напишите ниже название коллекции:",
-                                   chat_id=update.message.chat_id, reply_markup=ForceReply(input_field_placeholder="Коллекция"))
+                                   chat_id=update.message.chat_id, reply_markup=ForceReply())
     return 'prep_collection'
 
 
@@ -136,5 +135,5 @@ async def add_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     conn.close()
 
     if "new_collection" in context.user_data:
-        await context.bot.send_message(text="Новая группа {} была добавлена.".format(context.user_data["collection"]), chat_id=context.user_data["chat_id"])
-    await context.bot.send_message(text="Новая задача была добавлена в группу.", chat_id=context.user_data["chat_id"])
+        await context.bot.send_message(text="Новая коллекция {} была добавлена.".format(context.user_data["collection"]), chat_id=context.user_data["chat_id"])
+    await context.bot.send_message(text="Новая задача была добавлена в коллекцию.", chat_id=context.user_data["chat_id"])

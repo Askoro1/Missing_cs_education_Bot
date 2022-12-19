@@ -33,7 +33,7 @@ async def bot_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 2) /gen_task - решать задачи.\n
 3) /top - посмотреть топ-10 людей, решивших больше всех задач.\n
 4) /my_stat - посмотреть, сколько задач я решил. \n
-5) /all_tasks - посмотреть все задачи группы.\n
+5) /all_tasks - посмотреть все задачи в коллекции.\n
 6) /help - посмотреть доступные команды.\n
 """
 

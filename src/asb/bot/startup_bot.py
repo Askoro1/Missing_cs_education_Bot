@@ -22,8 +22,9 @@ from .handlers.check_ans import *
 from .handlers.top import *
 from .handlers.get_all_tasks import *
 from .handlers.my_stat import *
-from .handlers.delete_tasks import delete_task, is_access
-from .handlers.edit_tasks import edit_task, check_keyboard_for_edit, edit_condition
+from .handlers.delete_tasks import *
+from .handlers.delete_groups import *
+from .handlers.edit_tasks import *
 from .handlers.results import *
 
 def run_bot(config_file_path: str):
@@ -100,12 +101,25 @@ def run_bot(config_file_path: str):
     )
 
     delete_task_handler = ConversationHandler(
-        entry_points=[CommandHandler('delete', delete_task)],
+        entry_points=[CommandHandler('delete_task', delete_task)],
         states={
-            'is_access': [MessageHandler(filters.TEXT, is_access)]
+            'specify_group': [MessageHandler(filters.TEXT, specify_group_dt)],
+            'delete_task_from_db': [MessageHandler(filters.TEXT, delete_task_by_number)],
+            'show_next_steps': [CallbackQueryHandler(show_next_steps_dt)]
         },
         fallbacks=[]
     )
+
+    delete_group_handler = ConversationHandler(
+        entry_points=[CommandHandler('delete_group', delete_group)],
+        states={
+            'specify_group': [MessageHandler(filters.TEXT, specify_group_dg)],
+            'confirm_deletion': [CallbackQueryHandler(confirm_deletion)],
+            'show_next_steps': [CallbackQueryHandler(show_next_steps_dg)]
+        },
+        fallbacks=[]
+    )
+
     edit_task_handler = ConversationHandler(
         entry_points=[CommandHandler('edit', edit_task)],
         states={
@@ -126,6 +140,7 @@ def run_bot(config_file_path: str):
     application.add_handler(all_tasks_handler)
     application.add_handler(top_handler)
     application.add_handler(delete_task_handler)
+    application.add_handler(delete_group_handler)
     application.add_handler(edit_task_handler)
     application.add_handler(results_handler)
     # initialize and start the bot application

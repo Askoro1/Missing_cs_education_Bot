@@ -68,7 +68,7 @@ async def choose_task_collection(update: Update, context: ContextTypes.DEFAULT_T
     conn.close()
     if res is None:
         await context.bot.sendMessage(
-            text="Упс! Такой группы не существует. Создайте ее, если хотите!", chat_id=update.message.chat_id)
+            text="Упс! Такой коллекции не существует. Создайте ее, если хотите!", chat_id=update.message.chat_id)
         context.user_data.clear()
         await context.bot.sendMessage(
             text="Заканчиваем подбор задач.", chat_id=update.message.chat_id)

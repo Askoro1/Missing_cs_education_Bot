@@ -16,8 +16,8 @@ from .help import *
 
 
 async def all_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.sendMessage(text="Введите название группы, задания которой вы хотите посмотреть.",
-                                  chat_id=update.message.chat_id)
+    await context.bot.sendMessage(text="Введите название коллекции, задания которой вы хотите посмотреть:",
+                                  chat_id=update.message.chat_id, reply_markup=ForceReply())
     return "input_group"
 
 
@@ -30,7 +30,7 @@ async def get_all_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     res = query_db.fetchall()
     if res is None or len(res) == 0:
         await context.bot.sendMessage(
-            text="Такой группы не существует, создайте ее, если хотите!", chat_id=update.message.chat_id)
+            text="Такой коллекции не существует, создайте ее, если хотите!", chat_id=update.message.chat_id)
         keyboard = [
             [
                 InlineKeyboardButton("Выйти к списку команд", callback_data="Выйти к списку команд")

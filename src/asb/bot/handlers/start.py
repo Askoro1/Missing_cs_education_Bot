@@ -1,15 +1,4 @@
 import sqlite3 as sql
-from os import mkdir
-from telegram import (
-    KeyboardButton,
-    KeyboardButtonPollType,
-    Poll,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    Update,
-)
-from collections import deque
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 
@@ -42,20 +31,17 @@ async def choose_role(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     query = update.callback_query
     conn = sql.connect('database/study_bot.db')
     query_db = conn.cursor()
-    flag = True
     if query.data == "Студент":
         query_db.execute(f"""SELECT * FROM Students WHERE ID = {query.from_user.id};""")
         res_stud = query_db.fetchone()
         query_db.execute(f"""SELECT * FROM Teachers WHERE ID = {query.from_user.id};""")
         res_teach = query_db.fetchone()
-        if res_stud is not None:
-            await context.bot.send_message(text="Вы уже студент!",
+        if res_teach is not None:
+            await context.bot.send_message(text="Вы уже зарегистрированы как преподаватель.",
                                            chat_id=query.message.chat_id)
-            flag = False
-        elif res_teach is not None:
-            await context.bot.send_message(text="Вы уже преподаватель!",
+        elif res_stud is not None:
+            await context.bot.send_message(text="Вы уже зарегистрированы как студент.",
                                            chat_id=query.message.chat_id)
-            flag = False
         else:
             query_db.execute("""INSERT INTO Students VALUES(?, ?, ?, ?, ?, ?);""",
                              (query.from_user.id, query.from_user.first_name, query.from_user.last_name, 0, 0, None))
@@ -69,13 +55,11 @@ async def choose_role(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         query_db.execute(f"""SELECT * FROM Teachers WHERE ID = {query.from_user.id};""")
         res_teach = query_db.fetchone()
         if res_stud is not None:
-            await context.bot.send_message(text="Вы уже студент!",
+            await context.bot.send_message(text="Вы уже зарегистрированы как студент.",
                                            chat_id=query.message.chat_id)
-            flag = False
         elif res_teach is not None:
-            await context.bot.send_message(text="Вы уже преподаватель!",
+            await context.bot.send_message(text="Вы уже зарегистрированы как преподаватель.",
                                            chat_id=query.message.chat_id)
-            flag = False
         else:
             query_db.execute("""INSERT INTO Teachers VALUES(?, ?, ?);""",
                              (query.from_user.id, query.from_user.first_name, query.from_user.last_name))
@@ -84,6 +68,5 @@ async def choose_role(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             await context.bot.send_message(
                 text="Теперь вы можете добавлять сюда задачи, генерировать работы для студентов, а также смотреть их оценки.",
                 chat_id=query.message.chat_id)
-    if flag:
-        await bot_help(update, context)
+    await bot_help(update, context)
     return ConversationHandler.END

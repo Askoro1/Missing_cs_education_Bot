@@ -25,7 +25,7 @@ async def results(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_resuts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     group_id = update.message.text
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM Groups WHERE GROUP_ID = "{group_id}";""")

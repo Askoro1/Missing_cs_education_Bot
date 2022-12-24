@@ -19,7 +19,7 @@ async def my_stat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text("Что дальше?", reply_markup=reply_markup)
         return "what_to_do"
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     user_id = update.message.from_user.id
     query_db = conn.cursor()
     query_db.execute(

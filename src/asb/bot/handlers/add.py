@@ -64,7 +64,7 @@ async def prep_solution(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
 
 async def prep_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute("""SELECT GROUP_ID FROM GROUPS""")
     response = set([group[0] for group in query_db.fetchall()])
@@ -94,7 +94,7 @@ async def prep_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def create_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.callback_query.data == "Да":
-        conn = sql.connect('database/study_bot.db')
+        conn = sql.connect('/src/database/study_bot.db')
         query_db = conn.cursor()
         query_db.execute("""INSERT INTO GROUPS VALUES(?, ?, ?);""",
                          (context.user_data["collection"], context.user_data["user_id"], None))
@@ -114,7 +114,7 @@ async def create_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def add_query(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute("""SELECT max(ID) FROM ALL_TASKS;""")
     item_id = query_db.fetchone()[0] + 1

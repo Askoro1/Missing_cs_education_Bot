@@ -11,7 +11,7 @@ async def check_ans(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     user_nickname = update.message.from_user.username
     task_number = context.user_data["task_number"]
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM All_Tasks WHERE ID = "{task_number}";""")
@@ -111,7 +111,7 @@ async def choose_next_step_incorrect(update: Update, context: ContextTypes.DEFAU
 
 async def show_ans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     task_number = context.user_data["task_number"]
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM All_Tasks WHERE ID = "{task_number}" ORDER BY RANDOM() LIMIT 1;""")

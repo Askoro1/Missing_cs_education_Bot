@@ -32,7 +32,7 @@ async def all_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def get_all_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     user_id = update.message.from_user.id
     message = update.message.text

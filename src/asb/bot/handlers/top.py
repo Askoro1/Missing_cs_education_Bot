@@ -5,7 +5,7 @@ from telegram.ext import ContextTypes
 
 
 async def top(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute("""SELECT * FROM Students ORDER BY SUCCESS_SOLVE DESC LIMIT 10""")
     res = query_db.fetchall()

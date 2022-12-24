@@ -30,7 +30,7 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
 
 
 async def specify_group_dt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     user_id = update.message.from_user.id
     query_db.execute(f"""SELECT * FROM Groups WHERE GROUP_ID = "{update.message.text}";""")
@@ -79,7 +79,7 @@ async def delete_task_by_number(update: Update, context: ContextTypes.DEFAULT_TY
         await context.bot.send_message(text="Вы ввели несуществующий номер задачи. Возможно задача была удалена ранее. Повторите попытку.",
                                        chat_id=context.user_data["chat_id"], reply_markup=reply_markup)
     else:
-        conn = sql.connect('database/study_bot.db')
+        conn = sql.connect('/src/database/study_bot.db')
         query_db = conn.cursor()
         query_db.execute(f"""DELETE FROM All_Tasks WHERE ID = "{all_tasks[num_task]}";""")
         conn.commit()
@@ -102,7 +102,7 @@ async def show_next_steps_dt(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def show_tasks_in_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{context.user_data["group_id"]}";""")

@@ -2,7 +2,7 @@ from .help import *
 
 
 def check_teacher(user_id):
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM Teachers WHERE ID = "{user_id}";""")
@@ -13,7 +13,7 @@ def check_teacher(user_id):
 
 
 def check_student(user_id):
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM Students WHERE ID = "{user_id}";""")

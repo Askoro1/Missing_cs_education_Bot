@@ -29,7 +29,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 
 async def choose_role(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     if query.data == "Студент":
         query_db.execute(f"""SELECT * FROM Students WHERE ID = {query.from_user.id};""")

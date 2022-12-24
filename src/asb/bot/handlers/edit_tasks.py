@@ -30,7 +30,7 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
 
 
 async def specify_group_et(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     user_id = update.message.from_user.id
     query_db.execute(f"""SELECT * FROM Groups WHERE GROUP_ID = "{update.message.text}";""")
@@ -68,7 +68,7 @@ async def check_keyboard_for_edit(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def show_tasks_in_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[str, int]:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{context.user_data["group_id"]}";""")
@@ -139,7 +139,7 @@ async def edit_condition(update: Update, context: ContextTypes.DEFAULT_TYPE):
             text="Вы ввели данные в неверном формате, попробуйте еще раз!",
             chat_id=context.user_data["chat_id"], reply_markup=reply_markup)
         return 'show_next_steps_et'
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     if text_task[0] == 'Ответ':
         field = 'ANSWER'

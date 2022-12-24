@@ -5,7 +5,7 @@ from telegram.ext import ContextTypes
 
 async def bot_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Проверяем, есть ли пользователь в Teachers
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     if update.callback_query is not None:
         query_db.execute("""SELECT * from Teachers WHERE ID = {}""".format(update.callback_query.from_user.id))

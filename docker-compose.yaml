@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  bot-missing-cs-education:
+    build:
+      context: "."
+      dockerfile: src/Dockerfile
+    restart: always
+  bot-important-process:
+    build:
+      context: "."
+      dockerfile: important_process/Dockerfile
+    restart: always

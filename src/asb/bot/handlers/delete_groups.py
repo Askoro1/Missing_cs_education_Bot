@@ -34,7 +34,7 @@ async def delete_group_start_state(update: Update, context: ContextTypes.DEFAULT
 
 
 async def specify_group_dg(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     user_id = update.message.from_user.id
     query_db.execute(f"""SELECT * FROM Groups WHERE GROUP_ID = "{update.message.text}";""")
@@ -66,7 +66,7 @@ async def specify_group_dg(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if res[1] == user_id:
         context.user_data["group_id"] = update.message.text
 
-        conn = sql.connect('database/study_bot.db')
+        conn = sql.connect('/src/database/study_bot.db')
         query_db = conn.cursor()
         query_db.execute(
             f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{context.user_data["group_id"]}";""")
@@ -157,7 +157,7 @@ async def confirm_deletion(update: Update, context: ContextTypes.DEFAULT_TYPE) -
 
 
 async def delete_group_from_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     if "tasks" in context.user_data:
         for task in context.user_data["tasks"]:

@@ -67,7 +67,7 @@ async def choose_standard_task_group(update: Update, context: ContextTypes.DEFAU
 
 
 async def choose_task_collection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Union[int, str, None]:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(
         f"""SELECT * FROM All_Tasks WHERE GROUP_ID = "{update.message.text}" ORDER BY RANDOM() LIMIT 1;""")
@@ -96,7 +96,7 @@ async def choose_task_collection(update: Update, context: ContextTypes.DEFAULT_T
 
 
 async def send_task_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    conn = sql.connect('database/study_bot.db')
+    conn = sql.connect('/src/database/study_bot.db')
     query_db = conn.cursor()
     query_db.execute(f"""SELECT * FROM ALL_TASKS WHERE GROUP_ID = "{context.user_data["group"]}" ORDER BY RANDOM() LIMIT 1;""")
     res = query_db.fetchone()
